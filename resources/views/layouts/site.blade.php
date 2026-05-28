@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Tanzania Internet Governance Forum')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
     @php
@@ -128,7 +131,7 @@
         })->values();
     @endphp
 
-    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur" x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false">
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex items-center gap-3 font-bold leading-none text-slate-900" style="min-height: 44px;">
                 @if(!empty($siteLogoUrl))
@@ -235,7 +238,7 @@
             </div>
 
             @auth
-                <div class="flex items-center gap-2">
+                <div class="hidden items-center gap-2 md:flex">
                     <a href="{{ route('dashboard') }}" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Dashboard</a>
                     @if(auth()->user()->is_admin)
                         <a href="{{ route('admin.dashboard') }}" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Admin</a>
@@ -246,7 +249,91 @@
                     </form>
                 </div>
             @endauth
+
+            <button
+                type="button"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100 md:hidden"
+                :aria-expanded="mobileMenuOpen.toString()"
+                aria-controls="mobile-site-menu"
+                aria-label="Toggle navigation menu"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+            >
+                <svg x-show="!mobileMenuOpen" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+                <svg x-cloak x-show="mobileMenuOpen" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+            </button>
         </nav>
+
+        <div
+            id="mobile-site-menu"
+            x-cloak
+            x-show="mobileMenuOpen"
+            x-transition.origin.top
+            @click.outside="mobileMenuOpen = false"
+            class="border-t border-slate-200 bg-white px-4 py-5 shadow-lg md:hidden"
+        >
+            <div class="mx-auto max-w-7xl space-y-5">
+                <div class="space-y-1">
+                    @forelse($resolvedPrimaryNavLinks as $link)
+                        <a href="{{ $link['url'] }}" class="block rounded-md px-3 py-3 text-base font-semibold hover:bg-cyan-50 hover:text-cyan-800 {{ $link['active'] ? 'bg-cyan-50 text-cyan-800' : 'text-slate-800' }}" @click="mobileMenuOpen = false">{{ $link['label'] }}</a>
+                    @empty
+                        <a href="{{ route('home') }}" class="block rounded-md px-3 py-3 text-base font-semibold hover:bg-cyan-50 hover:text-cyan-800 {{ request()->routeIs('home') ? 'bg-cyan-50 text-cyan-800' : 'text-slate-800' }}" @click="mobileMenuOpen = false">Home</a>
+                    @endforelse
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <p class="px-3 text-xs font-bold uppercase text-slate-500">Our Work</p>
+                    <div class="mt-2 space-y-1">
+                        @foreach($ourWorkLinks as $item)
+                            <a
+                                href="{{ $item['url'] }}"
+                                @if(!empty($item['external'])) target="_blank" rel="noopener noreferrer" @endif
+                                class="block rounded-md px-3 py-2 text-sm font-medium hover:bg-cyan-50 hover:text-cyan-800 {{ $item['active'] ? 'bg-cyan-50 text-cyan-800' : 'text-slate-700' }}"
+                                @click="mobileMenuOpen = false"
+                            >
+                                {{ $item['label'] }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <p class="px-3 text-xs font-bold uppercase text-slate-500">Get Involved</p>
+                    <div class="mt-2 space-y-1">
+                        @foreach($getInvolvedLinks as $item)
+                            <a
+                                href="{{ $item['url'] }}"
+                                @if(!empty($item['external'])) target="_blank" rel="noopener noreferrer" @endif
+                                class="block rounded-md px-3 py-2 text-sm font-medium hover:bg-cyan-50 hover:text-cyan-800 {{ $item['active'] ? 'bg-cyan-50 text-cyan-800' : 'text-slate-700' }}"
+                                @click="mobileMenuOpen = false"
+                            >
+                                {{ $item['label'] }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <a href="{{ $contactNavLink['url'] }}" class="block rounded-md px-3 py-3 text-base font-semibold hover:bg-cyan-50 hover:text-cyan-800 {{ $contactNavLink['active'] ? 'bg-cyan-50 text-cyan-800' : 'text-slate-800' }}" @click="mobileMenuOpen = false">{{ $contactNavLink['label'] }}</a>
+
+                    @auth
+                        <div class="mt-3 grid gap-2">
+                            <a href="{{ route('dashboard') }}" class="rounded-md border border-slate-300 px-3 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100" @click="mobileMenuOpen = false">Dashboard</a>
+                            @if(auth()->user()->is_admin)
+                                <a href="{{ route('admin.dashboard') }}" class="rounded-md border border-slate-300 px-3 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100" @click="mobileMenuOpen = false">Admin</a>
+                            @endif
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="w-full rounded-md bg-cyan-700 px-3 py-3 text-sm font-semibold text-white hover:bg-cyan-800">Logout</button>
+                            </form>
+                        </div>
+                    @endauth
+                </div>
+            </div>
+        </div>
     </header>
 
     @if (session('status'))
