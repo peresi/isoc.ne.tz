@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Schema::defaultStringLength(191);
+
         View::composer('layouts.site', function ($view): void {
             $navigationPages = collect();
             $siteLogoUrl = null;
